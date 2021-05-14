@@ -5,25 +5,32 @@ import ImageList from "./ImageList";
 import Spinner from "./Spinner";
 
 class App extends React.Component {
-  state = { images: [] };
+  state = { images: [], loading: false };
   // This is how we get the value from child
   onFormSubmit = async (term) => {
-    const response = await Unsplash.get("/search/photos", {
-      params: {
-        query: term,
-      },
-    });
-    this.setState({ images: response.data.results });
+    try {
+      this.setState({ loading: true });
+      const response = await Unsplash.get("/search/photos", {
+        params: {
+          query: term,
+        },
+      });
+      this.setState({ images: response.data.results, loading: false });
+    } catch (e) {
+      console.log(e);
+    }
   };
-  componentDidUpdate() {
-    return <Spinner />;
-  }
   render() {
     return (
       <div className="ui container" style={{ marginTop: "10px" }}>
         <SearchBar onSubmit={this.onFormSubmit} />
-        {/* <Spinner images={this.state.images} /> */}
-        <ImageList images={this.state.images} />
+        <div>
+          {this.state.loading ? (
+            <Spinner />
+          ) : (
+            <ImageList images={this.state.images} />
+          )}
+        </div>
       </div>
     );
   }
